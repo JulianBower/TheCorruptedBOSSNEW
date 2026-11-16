@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "hellgauntletboss:steel_helmet",
+    "hellgauntletboss:steel_chestplate",
+    "hellgauntletboss:steel_leggings",
+    "hellgauntletboss:steel_boots",
+    "hellgauntletboss:corrupted_helmet",
+    "hellgauntletboss:corrupted_chestplate",
+    "hellgauntletboss:corrupted_leggings",
+    "hellgauntletboss:corrupted_boots"
+  ]
+}

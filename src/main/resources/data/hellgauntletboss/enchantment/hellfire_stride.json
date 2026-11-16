@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.hellgauntletboss.hellfire_stride"
+  },
+  "supported_items": "#hellgauntletboss:enchantable/knight_boots",
+  "primary_items": "#hellgauntletboss:enchantable/knight_boots",
+  "weight": 2,
+  "max_level": 2,
+  "min_cost": {
+    "base": 14,
+    "per_level_above_first": 8
+  },
+  "max_cost": {
+    "base": 44,
+    "per_level_above_first": 8
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "feet"
+  ],
+  "effects": {}
+}

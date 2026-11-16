@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "hellgauntletboss:corrupted_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "hellgauntletboss:steel_chestplate"
+  },
+  "addition": {
+    "item": "hellgauntletboss:corrupted_core"
+  },
+  "result": {
+    "id": "hellgauntletboss:corrupted_chestplate",
+    "count": 1
+  }
+}

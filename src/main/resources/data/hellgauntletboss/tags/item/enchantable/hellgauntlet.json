@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "hellgauntlet:gauntlet_of_hell",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.hellgauntletboss.cataclysmic_discharge"
+  },
+  "supported_items": "#hellgauntletboss:enchantable/hellgauntlet",
+  "primary_items": "#hellgauntletboss:enchantable/hellgauntlet",
+  "weight": 1,
+  "max_level": 2,
+  "min_cost": {
+    "base": 18,
+    "per_level_above_first": 8
+  },
+  "max_cost": {
+    "base": 48,
+    "per_level_above_first": 8
+  },
+  "anvil_cost": 6,
+  "slots": [
+    "hand"
+  ],
+  "effects": {}
+}

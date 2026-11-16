@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "OGO",
+    " B "
+  ],
+  "key": {
+    "C": { "item": "hellgauntletboss:corrupted_core" },
+    "O": { "item": "minecraft:obsidian" },
+    "G": { "item": "minecraft:netherite_ingot" },
+    "B": { "item": "minecraft:blaze_rod" }
+  },
+  "result": { "id": "hellgauntlet:gauntlet_of_hell", "count": 1 }
+}

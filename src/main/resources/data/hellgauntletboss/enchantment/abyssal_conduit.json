@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.hellgauntletboss.abyssal_conduit"
+  },
+  "supported_items": "#hellgauntletboss:enchantable/hellgauntlet",
+  "primary_items": "#hellgauntletboss:enchantable/hellgauntlet",
+  "weight": 2,
+  "max_level": 3,
+  "min_cost": {
+    "base": 12,
+    "per_level_above_first": 8
+  },
+  "max_cost": {
+    "base": 42,
+    "per_level_above_first": 8
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "hand"
+  ],
+  "effects": {}
+}
