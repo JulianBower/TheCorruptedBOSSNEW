@@ -160,7 +160,7 @@ def paint(variant):
                     if variant=='awakened' and right and vnoise(pb,3.0,80)>0.78: c=c+np.array([30,4,4])     # faint red subsurface glow
                 img[py,px]=(*np.clip(c,0,255).astype(np.uint8),alpha)
                 if g is not None and alpha: glow[py,px]=(*np.clip(g,0,255).astype(np.uint8),255)
-    patches(img,glow,variant)
+    # no cube patches: the armor draws the boss atlas 1-to-1 (undersuit.png covers the skin)
     return Image.fromarray(img,'RGBA'),Image.fromarray(glow,'RGBA')
 if __name__=='__main__':
     import os

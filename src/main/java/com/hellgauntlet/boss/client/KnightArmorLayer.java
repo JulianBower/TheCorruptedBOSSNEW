@@ -16,11 +16,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Emissive pass for worn Corrupted Knight pieces: the_corrupted_glow at full bright, so the crimson T-visor and veins
+ * Undersuit (dark charcoal, hides skin) for every worn Knight piece, plus the emissive pass for Corrupted pieces: the_corrupted_glow at full bright, so the crimson T-visor and veins
  * glow like on the boss. The base textures come from KnightArmorItem#getArmorTexture (boss atlas) through the vanilla
  * armor layer; players and every other humanoid-model mob get this layer (see ClientSetup#onAddLayers).
  */
 public class KnightArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>> extends RenderLayer<T, M> {
+    private static final ResourceLocation UNDERSUIT = tex("undersuit");
     private static final ResourceLocation GLOW = tex("the_corrupted_glow");
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
@@ -47,6 +48,8 @@ public class KnightArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>
             CorruptedPlayerArmorModel model = KnightArmorClientExtensions.model(slot);
             model.entity = entity;
             ((HumanoidModel) this.getParentModel()).copyPropertiesTo(model);
+            model.renderUndersuit(poseStack, buffer.getBuffer(RenderType.entityCutoutNoCull(UNDERSUIT)), light,
+                    net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(entity, 0.0F), -1);
             if (armor.isCorrupted()) {
                 model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucentEmissive(GLOW)),
                         LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, -1);

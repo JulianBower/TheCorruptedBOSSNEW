@@ -18,5 +18,9 @@ public final class ModNetwork {
         registrar.playToClient(CorruptionAttackFxPayload.TYPE, CorruptionAttackFxPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         ClientFxState.addAttack(payload, context.player().level().getGameTime())));
+        registrar.playToClient(LightningArcPayload.TYPE, LightningArcPayload.CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.hellgauntlet.boss.client.ClientLightningArcs.addArc(payload.x1(), payload.y1(), payload.z1(),
+                                payload.x2(), payload.y2(), payload.z2(), payload.seed())));
     }
 }

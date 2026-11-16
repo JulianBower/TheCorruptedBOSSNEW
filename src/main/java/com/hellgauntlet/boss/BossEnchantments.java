@@ -13,7 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Npc;
+import net.minecraft.world.entity.Npc;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -37,6 +37,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
@@ -77,6 +78,12 @@ public final class BossEnchantments {
 
     private static ResourceKey<Enchantment> key(String name) {
         return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(TheCorruptedMod.MODID, name));
+    }
+
+    /** Sends one real 3D jagged lightning arc to every player within 48 blocks of its start. */
+    private static void arc(ServerLevel level, Vec3 from, Vec3 to) {
+        PacketDistributor.sendToPlayersNear(level, null, from.x, from.y, from.z, 48.0D,
+                new LightningArcPayload(from.x, from.y, from.z, to.x, to.y, to.z, level.random.nextLong()));
     }
 
     // ---------------------------------------------------------------- lookup helpers
@@ -230,7 +237,7 @@ public final class BossEnchantments {
                                 && !(e instanceof TheCorruptedBossEntity) && e.position().distanceTo(center) >= radius)
                 .stream().sorted(Comparator.comparingDouble(e -> e.position().distanceToSqr(center))).limit(3).toList();
         for (LivingEntity target : targets) {
-            BossCombat.boltBetween(level, center.add(0.0, 0.3, 0.0), target.getEyePosition());
+            arc(level, center.add(0.0, 0.3, 0.0), target.getEyePosition());
             DamageSource source = player != null ? level.damageSources().playerAttack(player) : level.damageSources().magic();
             target.invulnerableTime = 0;
             target.hurt(source, 5.0F * lvl);
@@ -292,7 +299,7 @@ public final class BossEnchantments {
         if (lvl <= 0 || !(attacker instanceof LivingEntity target) || target == player || !(player.level() instanceof ServerLevel level)) {
             return;
         }
-        BossCombat.boltBetween(level, player.getEyePosition(), target.getEyePosition());
+        arc(level, player.getEyePosition(), target.getEyePosition());
         if (target instanceof Player other && (other.isCreative() || other.isSpectator())) {
             return;
         }
@@ -315,7 +322,7 @@ public final class BossEnchantments {
         for (LivingEntity e : near) {
             e.addEffect(new MobEffectInstance(ModEffects.CORRUPTION, duration, 0), player);
             if (victim.level() instanceof ServerLevel level) {
-                BossCombat.boltBetween(level, victim.getEyePosition(), e.getEyePosition());
+                arc(level, victim.getEyePosition(), e.getEyePosition());
             }
         }
     }
