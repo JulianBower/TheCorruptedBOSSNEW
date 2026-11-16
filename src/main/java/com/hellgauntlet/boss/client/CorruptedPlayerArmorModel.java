@@ -4,11 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +15,7 @@ import java.util.Map;
 /**
  * Wearable armor that is the boss: T-visor knight helmet with brow/cheek plates, thick pauldrons, chestplate, waist
  * tassets, knee guards, and the tattered cape. The geometry is TheCorruptedModel's cubes baked to full player scale
- * (ArmorMesh, tools/gen_armor.py) over a dark undersuit (renderUndersuit). One instance exists per armor slot and
+ * (ArmorMesh, tools/gen_armor.py) (plates only, no under-layer). One instance exists per armor slot and
  * draws only that slot's quads, following the vanilla humanoid part poses. It is textured by KnightArmorLayer with the
  * boss atlas (the_corrupted_normal / _awakened + _glow), never with a flat vanilla armor texture.
  */
@@ -30,20 +25,10 @@ public class CorruptedPlayerArmorModel extends HumanoidModel<LivingEntity> {
     /** Entity being rendered, set by the item extension right before rendering (drives the cape). */
     public LivingEntity entity;
 
-    private final ModelPart cHead, cBody, cRightArm, cLeftArm, cRightLeg, cLeftLeg, cRightBoot, cLeftBoot;
 
     public CorruptedPlayerArmorModel(EquipmentSlot slot) {
         super(emptyRoot());
         this.slot = slot;
-        ModelPart root = cubes().bakeRoot();
-        this.cHead = root.getChild("c_head");
-        this.cBody = root.getChild("c_body");
-        this.cRightArm = root.getChild("c_right_arm");
-        this.cLeftArm = root.getChild("c_left_arm");
-        this.cRightLeg = root.getChild("c_right_leg");
-        this.cLeftLeg = root.getChild("c_left_leg");
-        this.cRightBoot = root.getChild("c_right_boot");
-        this.cLeftBoot = root.getChild("c_left_boot");
     }
 
     private static ModelPart emptyRoot() {
@@ -81,59 +66,6 @@ public class CorruptedPlayerArmorModel extends HumanoidModel<LivingEntity> {
             default -> {
             }
         }
-    }
-
-    /**
-     * Dark charcoal (#1E1E22) undersuit for the worn slot: plain player-scale cubes that hide every pixel of skin
-     * between the boss plates. KnightArmorLayer draws them with undersuit.png; the plates themselves (renderToBuffer)
-     * use the boss atlas 1-to-1 and nothing is painted into the boss texture.
-     */
-    public void renderUndersuit(PoseStack ps, VertexConsumer vc, int light, int overlay, int color) {
-        switch (this.slot) {
-            case HEAD -> solid(this.cHead, this.head, ps, vc, light, overlay, color);
-            case CHEST -> {
-                solid(this.cBody, this.body, ps, vc, light, overlay, color);
-                solid(this.cRightArm, this.rightArm, ps, vc, light, overlay, color);
-                solid(this.cLeftArm, this.leftArm, ps, vc, light, overlay, color);
-            }
-            case LEGS -> {
-                solid(this.cRightLeg, this.rightLeg, ps, vc, light, overlay, color);
-                solid(this.cLeftLeg, this.leftLeg, ps, vc, light, overlay, color);
-            }
-            case FEET -> {
-                solid(this.cRightBoot, this.rightLeg, ps, vc, light, overlay, color);
-                solid(this.cLeftBoot, this.leftLeg, ps, vc, light, overlay, color);
-            }
-            default -> {
-            }
-        }
-    }
-
-    private static void solid(ModelPart cube, ModelPart pose, PoseStack ps, VertexConsumer vc, int light, int overlay, int color) {
-        cube.copyFrom(pose);
-        cube.render(ps, vc, light, overlay, color);
-    }
-
-    private static LayerDefinition cubes() {
-        MeshDefinition mesh = new MeshDefinition();
-        PartDefinition root = mesh.getRoot();
-        root.addOrReplaceChild("c_head", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-4.5F, -8.5F, -4.5F, 9.0F, 9.0F, 9.0F), PartPose.ZERO);
-        root.addOrReplaceChild("c_body", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-4.5F, 0.0F, -2.5F, 9.0F, 12.0F, 5.0F), PartPose.ZERO);
-        root.addOrReplaceChild("c_right_arm", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-3.4F, -2.4F, -2.4F, 4.8F, 12.8F, 4.8F), PartPose.ZERO);
-        root.addOrReplaceChild("c_left_arm", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-1.4F, -2.4F, -2.4F, 4.8F, 12.8F, 4.8F), PartPose.ZERO);
-        root.addOrReplaceChild("c_right_leg", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-2.3F, 0.0F, -2.3F, 4.6F, 12.0F, 4.6F), PartPose.ZERO);
-        root.addOrReplaceChild("c_left_leg", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-2.3F, 0.0F, -2.3F, 4.6F, 12.0F, 4.6F), PartPose.ZERO);
-        root.addOrReplaceChild("c_right_boot", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-2.4F, 8.0F, -2.4F, 4.8F, 4.0F, 4.8F), PartPose.ZERO);
-        root.addOrReplaceChild("c_left_boot", CubeListBuilder.create().texOffs(0, 0)
-                .addBox(-2.4F, 8.0F, -2.4F, 4.8F, 4.0F, 4.8F), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 64, 64);
     }
 
     private static void part(PoseStack ps, ModelPart part, float[] quads, VertexConsumer vc, int light, int overlay, int color) {
