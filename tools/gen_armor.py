@@ -2,8 +2,8 @@
 import numpy as np, os
 from PIL import Image
 from common import *
-S=2.8; LEG_S=3.24; HEAD_S=2.45   # vertical scales (kept) and head scale (boss head ~9.4 px wide on the player)
-TXZ=3.14; LXZ=3.6                 # horizontal scale of torso/arms and legs: plates stand proud of the 9x12x5 body cube
+S=2.8; LEG_S=3.24; HEAD_S=2.8   # vertical scales (kept) and head scale (boss head ~9.4 px wide on the player)
+TXZ=3.7; LXZ=4.3                 # horizontal scale of torso/arms and legs: plates stand proud of the 9x12x5 body cube
 PP={'R_ARM':(-5*TXZ/S,2,0),'L_ARM':(5*TXZ/S,2,0),'TORSO':(0,0,0),'R_LEG':(-1.9*LXZ/S,12,0),'L_LEG':(1.9*LXZ/S,12,0)}
 hp=bb2m(np.array(PIVOT_BB['HEAD']))
 def fmt(v):

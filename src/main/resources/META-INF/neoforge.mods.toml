@@ -1,23 +1,24 @@
 modLoader = "javafml"
-loaderVersion = "[4,)"
-license = "All Rights Reserved"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
 
 [[mods]]
-modId = "angelofdeathboss"
-version = "1.0.0"
-displayName = "The Angel of Death"
-description = '''Adds The Angel of Death boss, void crows, and the Wings of the Angel of Death.'''
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
 
-[[dependencies.angelofdeathboss]]
+[[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.1,)"
+versionRange = "${neo_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.angelofdeathboss]]
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.1,1.22)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
