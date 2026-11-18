@@ -83,11 +83,11 @@ public class CorruptedPlayerArmorModel extends HumanoidModel<LivingEntity> {
                     + Mth.sin(this.entity.tickCount * 0.1F) * 0.03F + (this.entity.isCrouching() ? 0.3F : 0.0F);
         }
         ps.pushPose();
-        ps.translate(0.0F, 1.0F / 16.0F, 3.0F / 16.0F);
+        ps.translate(0.0F, 1.0F / 16.0F, 3.6F / 16.0F);
         ps.mulPose(com.mojang.math.Axis.XP.rotation(angle));
         float[] uv = ArmorMesh.CAPE_UV;
         // two layers (outside / inside) so it is visible from both sides
-        box(ps, vc, -4.6F, 0.0F, 0.0F, 4.6F, 16.0F, 0.7F, uv, light, overlay, color);
+        box(ps, vc, -5.4F, 0.0F, 0.0F, 5.4F, 16.0F, 0.7F, uv, light, overlay, color);
         ps.popPose();
     }
 
