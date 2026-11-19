@@ -98,17 +98,17 @@ public final class BlueOverrides {
             this.delegate = made;
         }
 
-        @Override
+        @java.lang.Override
         public boolean shouldRender(Entity entity, Frustum frustum, double x, double y, double z) {
             return this.delegate != null ? this.delegate.shouldRender(entity, frustum, x, y, z) : super.shouldRender(entity, frustum, x, y, z);
         }
 
-        @Override
+        @java.lang.Override
         public ResourceLocation getTextureLocation(Entity entity) {
             return this.delegate != null ? this.delegate.getTextureLocation(entity) : TEXTURE;
         }
 
-        @Override
+        @java.lang.Override
         public void render(Entity entity, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int light) {
             if (DECIDED.size() > 512) {
                 DECIDED.clear();
