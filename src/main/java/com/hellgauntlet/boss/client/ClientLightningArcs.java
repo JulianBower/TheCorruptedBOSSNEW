@@ -26,12 +26,16 @@ public final class ClientLightningArcs {
         final Vec3 from;
         final Vec3 to;
         final long seed;
+        final int style;
+        final float scale;
         int ticksLeft = DURATION;
 
-        Arc(Vec3 from, Vec3 to, long seed) {
+        Arc(Vec3 from, Vec3 to, long seed, int style, float scale) {
             this.from = from;
             this.to = to;
             this.seed = seed;
+            this.style = style;
+            this.scale = scale;
         }
     }
 
@@ -39,8 +43,9 @@ public final class ClientLightningArcs {
 
     private ClientLightningArcs() {}
 
-    public static void addArc(double x1, double y1, double z1, double x2, double y2, double z2, long seed) {
-        ARCS.add(new Arc(new Vec3(x1, y1, z1), new Vec3(x2, y2, z2), seed));
+    public static void addArc(double x1, double y1, double z1, double x2, double y2, double z2, long seed,
+                              int style, float scale) {
+        ARCS.add(new Arc(new Vec3(x1, y1, z1), new Vec3(x2, y2, z2), seed, style, scale));
     }
 
     @SubscribeEvent
@@ -67,8 +72,14 @@ public final class ClientLightningArcs {
         poseStack.translate(-cam.x, -cam.y, -cam.z);
         for (Arc arc : ARCS) {
             float fade = arc.ticksLeft / (float) DURATION;
-            BossVoidFx.strike(vc, poseStack.last(),
-                    BossVoidFx.jaggedPath(RandomSource.create(arc.seed), arc.from, arc.to, 8, 0.14), 1.2F, fade);
+            if (arc.style == 1) {
+                // electric blue: sharper jitter, white-cyan core inside a sky-blue glow
+                BlueVoidFx.strike(vc, poseStack.last(),
+                        BossVoidFx.jaggedPath(RandomSource.create(arc.seed), arc.from, arc.to, 10, 0.2), 1.2F * arc.scale, fade);
+            } else {
+                BossVoidFx.strike(vc, poseStack.last(),
+                        BossVoidFx.jaggedPath(RandomSource.create(arc.seed), arc.from, arc.to, 8, 0.14), 1.2F * arc.scale, fade);
+            }
         }
         poseStack.popPose();
         buffers.endBatch(RenderType.lightning());

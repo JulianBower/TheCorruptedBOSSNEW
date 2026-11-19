@@ -15,3 +15,7 @@ Worn pieces use the boss atlas through `KnightArmorItem#getArmorTexture` (`the_c
 ## Little Demon and enchantments
 `little_demon` is a Nether trader (spawns rarely in nether_wastes, crimson_forest, basalt_deltas via `neoforge/biome_modifier`) selling 4-5 of the 7 custom enchanted books for gold ingots, blaze rods, netherite scraps or steel ingots.
 Enchantments are data-driven (`data/hellgauntletboss/enchantment`); effects are in `BossEnchantments`. The Hellgauntlet ones apply to `hellgauntlet:gauntlet_of_hell` through `tags/item/enchantable/hellgauntlet.json`. Texture script: `tools/paint_demon.py <outdir>`.
+
+## Sovereign set, Abyssal Storm Gauntlet, Abyssal Corruption
+- Sovereign Knight armor (+6 armor over Corrupted): smithing Corrupted piece + Nether Star + netherite upgrade template. Parries every 2nd hit; every 2nd melee hit applies Abyssal Corruption (3 hearts/sec true damage, blue lightning).
+- Abyssal Storm Gauntlet: smith the Gauntlet of Hell (requires the hellgauntlet mod) with a Nether Star. 8 hearts melee, accepts the gauntlet enchantments, 2x blast, true-damage blue chain lightning.

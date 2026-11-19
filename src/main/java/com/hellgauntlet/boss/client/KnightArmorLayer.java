@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
  * armor layer; players and every other humanoid-model mob get this layer (see ClientSetup#onAddLayers).
  */
 public class KnightArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>> extends RenderLayer<T, M> {
-    private static final ResourceLocation GLOW = tex("the_corrupted_glow");
     private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     public KnightArmorLayer(RenderLayerParent<T, M> parent) {
@@ -47,8 +46,8 @@ public class KnightArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>
             CorruptedPlayerArmorModel model = KnightArmorClientExtensions.model(slot);
             model.entity = entity;
             ((HumanoidModel) this.getParentModel()).copyPropertiesTo(model);
-            if (armor.isCorrupted()) {
-                model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucentEmissive(GLOW)),
+            if (armor.glowTexture() != null) {
+                model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucentEmissive(armor.glowTexture())),
                         LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, -1);
             }
         }

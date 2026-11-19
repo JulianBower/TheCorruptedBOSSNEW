@@ -5,8 +5,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/** One jagged 3D red lightning arc from (x1,y1,z1) to (x2,y2,z2); `seed` makes every client draw the same bolt. */
-public record LightningArcPayload(double x1, double y1, double z1, double x2, double y2, double z2, long seed)
+/** One jagged 3D lightning arc (style 0 = red, 1 = electric blue; scale multiplies the bolt width) from (x1,y1,z1) to (x2,y2,z2); `seed` makes every client draw the same bolt. */
+public record LightningArcPayload(double x1, double y1, double z1, double x2, double y2, double z2, long seed,
+                                  int style, float scale)
         implements CustomPacketPayload {
     public static final Type<LightningArcPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(TheCorruptedMod.MODID, "lightning_arc"));
@@ -19,9 +20,11 @@ public record LightningArcPayload(double x1, double y1, double z1, double x2, do
                 buf.writeDouble(p.y2);
                 buf.writeDouble(p.z2);
                 buf.writeLong(p.seed);
+                buf.writeVarInt(p.style);
+                buf.writeFloat(p.scale);
             },
             buf -> new LightningArcPayload(buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readLong()));
+                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readLong(), buf.readVarInt(), buf.readFloat()));
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

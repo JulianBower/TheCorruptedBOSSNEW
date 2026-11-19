@@ -39,8 +39,20 @@ public class CorruptedPlayerArmorModel extends HumanoidModel<LivingEntity> {
         return new ModelPart(List.of(), children);
     }
 
+    /** The whole armor is stretched this much taller than the player, anchored at the feet. */
+    private static final float HEIGHT_SCALE = 1.12F;
+
     @Override
     public void renderToBuffer(PoseStack ps, VertexConsumer vc, int light, int overlay, int color) {
+        ps.pushPose();
+        ps.translate(0.0F, 24.0F / 16.0F, 0.0F);   // model space: feet are at y = 24 px
+        ps.scale(1.0F, HEIGHT_SCALE, 1.0F);
+        ps.translate(0.0F, -24.0F / 16.0F, 0.0F);
+        renderSlot(ps, vc, light, overlay, color);
+        ps.popPose();
+    }
+
+    private void renderSlot(PoseStack ps, VertexConsumer vc, int light, int overlay, int color) {
         switch (this.slot) {
             case HEAD -> {
                 part(ps, this.head, ArmorMesh.HEAD.D, vc, light, overlay, color);

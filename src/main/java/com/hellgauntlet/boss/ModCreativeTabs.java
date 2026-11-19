@@ -29,6 +29,11 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CORRUPTED_CHESTPLATE.get());
                         output.accept(ModItems.CORRUPTED_LEGGINGS.get());
                         output.accept(ModItems.CORRUPTED_BOOTS.get());
+                        output.accept(ModItems.SOVEREIGN_HELMET.get());
+                        output.accept(ModItems.SOVEREIGN_CHESTPLATE.get());
+                        output.accept(ModItems.SOVEREIGN_LEGGINGS.get());
+                        output.accept(ModItems.SOVEREIGN_BOOTS.get());
+                        output.accept(ModItems.ABYSSAL_STORM_GAUNTLET.get());
                     })
                     .build());
 

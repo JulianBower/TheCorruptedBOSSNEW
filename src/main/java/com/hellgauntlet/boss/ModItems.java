@@ -50,7 +50,22 @@ public final class ModItems {
     public static final DeferredItem<KnightArmorItem> CORRUPTED_LEGGINGS = armor("corrupted_leggings", ModArmorMaterials.CORRUPTED, ArmorItem.Type.LEGGINGS, 45, true);
     public static final DeferredItem<KnightArmorItem> CORRUPTED_BOOTS = armor("corrupted_boots", ModArmorMaterials.CORRUPTED, ArmorItem.Type.BOOTS, 45, true);
 
+    // Tier 3: Fused Sovereign Knight (durability multiplier 60) and the evolved gauntlet
+    public static final DeferredItem<KnightArmorItem> SOVEREIGN_HELMET = sovereign("sovereign_helmet", ArmorItem.Type.HELMET);
+    public static final DeferredItem<KnightArmorItem> SOVEREIGN_CHESTPLATE = sovereign("sovereign_chestplate", ArmorItem.Type.CHESTPLATE);
+    public static final DeferredItem<KnightArmorItem> SOVEREIGN_LEGGINGS = sovereign("sovereign_leggings", ArmorItem.Type.LEGGINGS);
+    public static final DeferredItem<KnightArmorItem> SOVEREIGN_BOOTS = sovereign("sovereign_boots", ArmorItem.Type.BOOTS);
+
+    public static final DeferredItem<AbyssalStormGauntletItem> ABYSSAL_STORM_GAUNTLET =
+            ITEMS.register("abyssal_storm_gauntlet", () -> new AbyssalStormGauntletItem(new Item.Properties()
+                    .stacksTo(1).rarity(Rarity.EPIC).fireResistant().attributes(AbyssalStormGauntletItem.createAttributes())));
+
     private ModItems() {}
+
+    private static DeferredItem<KnightArmorItem> sovereign(String name, ArmorItem.Type type) {
+        return ITEMS.register(name, () -> new KnightArmorItem(ModArmorMaterials.SOVEREIGN, type,
+                new Item.Properties().durability(type.getDurability(60)).rarity(Rarity.EPIC).fireResistant(), 3));
+    }
 
     private static DeferredItem<KnightArmorItem> armor(String name, Holder<ArmorMaterial> material, ArmorItem.Type type, int durabilityMultiplier, boolean corrupted) {
         return ITEMS.register(name, () -> new KnightArmorItem(material, type,

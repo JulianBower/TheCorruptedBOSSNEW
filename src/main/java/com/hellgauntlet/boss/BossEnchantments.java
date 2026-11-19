@@ -80,10 +80,28 @@ public final class BossEnchantments {
         return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(TheCorruptedMod.MODID, name));
     }
 
+    public static final int STYLE_RED = 0;
+    public static final int STYLE_BLUE = 1;
+
     /** Sends one real 3D jagged lightning arc to every player within 48 blocks of its start. */
-    private static void arc(ServerLevel level, Vec3 from, Vec3 to) {
+    public static void arc(ServerLevel level, Vec3 from, Vec3 to, int style, float scale) {
         PacketDistributor.sendToPlayersNear(level, null, from.x, from.y, from.z, 48.0D,
-                new LightningArcPayload(from.x, from.y, from.z, to.x, to.y, to.z, level.random.nextLong()));
+                new LightningArcPayload(from.x, from.y, from.z, to.x, to.y, to.z, level.random.nextLong(), style, scale));
+    }
+
+    private static void arc(ServerLevel level, Vec3 from, Vec3 to) {
+        arc(level, from, to, STYLE_RED, 1.0F);
+    }
+
+    /** 100% armor-bypassing true damage (GENERIC_KILL ignores armor, enchantments, resistance) credited to `attacker`. */
+    public static void trueDamage(ServerLevel level, LivingEntity target, Entity attacker, float amount) {
+        if (target instanceof Player other && (other.isCreative() || other.isSpectator())) {
+            return;
+        }
+        DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE)
+                .getOrThrow(DamageTypes.GENERIC_KILL), attacker);
+        target.invulnerableTime = 0;
+        target.hurt(source, amount);
     }
 
     // ---------------------------------------------------------------- lookup helpers
@@ -101,7 +119,8 @@ public final class BossEnchantments {
     }
 
     public static boolean isGauntlet(ItemStack stack) {
-        return !stack.isEmpty() && GAUNTLET_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        return !stack.isEmpty() && (stack.getItem() instanceof AbyssalStormGauntletItem
+                || GAUNTLET_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem())));
     }
 
     /** Highest level of the enchantment on a Hellgauntlet in either hand (or, if asked, anywhere in the inventory). */
@@ -116,6 +135,11 @@ public final class BossEnchantments {
             }
         }
         return best;
+    }
+
+    public static boolean holdsFused(Player player) {
+        return player.getMainHandItem().getItem() instanceof AbyssalStormGauntletItem
+                || player.getOffhandItem().getItem() instanceof AbyssalStormGauntletItem;
     }
 
     private static boolean isChargeableOrbMode(ItemStack stack) {
@@ -161,20 +185,27 @@ public final class BossEnchantments {
     }
 
     private static void gauntletCooldown(Player player) {
-        var item = BuiltInRegistries.ITEM.get(GAUNTLET_ID);
-        if (!BuiltInRegistries.ITEM.containsKey(GAUNTLET_ID) || !player.getCooldowns().isOnCooldown(item)) {
+        boolean any = false;
+        for (net.minecraft.world.item.Item item : new net.minecraft.world.item.Item[]{
+                BuiltInRegistries.ITEM.containsKey(GAUNTLET_ID) ? BuiltInRegistries.ITEM.get(GAUNTLET_ID) : null,
+                ModItems.ABYSSAL_STORM_GAUNTLET.get()}) {
+            if (item == null || !player.getCooldowns().isOnCooldown(item)) {
+                continue;
+            }
+            any = true;
+            int lvl = gauntletLevel(player, ABYSSAL_CONDUIT, false);
+            float p = player.getCooldowns().getCooldownPercent(item, 0.0F);
+            if (lvl <= 0 || player.getPersistentData().getBoolean(COOLDOWN_TAG) || p >= 0.999F || p <= 0.0F) {
+                continue;
+            }
+            player.getPersistentData().putBoolean(COOLDOWN_TAG, true);
+            int total = Math.round(1.0F / (1.0F - p));
+            int shorter = Math.max(1, Math.round(total * (1.0F - 0.12F * lvl)));
+            player.getCooldowns().addCooldown(item, Math.max(1, shorter - 1));
+        }
+        if (!any) {
             player.getPersistentData().putBoolean(COOLDOWN_TAG, false);
-            return;
         }
-        int lvl = gauntletLevel(player, ABYSSAL_CONDUIT, false);
-        float p = player.getCooldowns().getCooldownPercent(item, 0.0F);
-        if (lvl <= 0 || player.getPersistentData().getBoolean(COOLDOWN_TAG) || p >= 0.999F || p <= 0.0F) {
-            return;
-        }
-        player.getPersistentData().putBoolean(COOLDOWN_TAG, true);
-        int total = Math.round(1.0F / (1.0F - p));
-        int shorter = Math.max(1, Math.round(total * (1.0F - 0.12F * lvl)));
-        player.getCooldowns().addCooldown(item, Math.max(1, shorter - 1));
     }
 
     // ---------------------------------------------------------------- 2. Cataclysmic Discharge
@@ -189,7 +220,13 @@ public final class BossEnchantments {
         }
     }
 
-    /** A fresh Void Orb of an enchanted gauntlet gets a bigger blast radius (+1.5 per level, rounded up to whole blocks). */
+    private static final ResourceLocation LASER_ID = ResourceLocation.fromNamespaceAndPath("hellgauntlet", "laser_beam");
+    private static final String FUSED_TAG = "hgb_fused";
+
+    /**
+     * A fresh Void Orb gets a bigger blast radius: Cataclysmic Discharge adds +1.5 per level (rounded up), and the
+     * Fused gauntlet makes normal orbs 1.85x bigger with a minimum radius of 2 (a quick tap is no longer a pinprick).
+     */
     @SubscribeEvent
     public static void onOrbJoin(EntityJoinLevelEvent event) {
         Entity orb = event.getEntity();
@@ -201,7 +238,8 @@ public final class BossEnchantments {
             return;
         }
         int lvl = gauntletLevel(player, CATACLYSMIC_DISCHARGE, false);
-        if (lvl <= 0) {
+        boolean fused = holdsFused(player);
+        if (lvl <= 0 && !fused) {
             return;
         }
         Field radius = field(orb.getClass(), "chargedRadius");
@@ -209,7 +247,11 @@ public final class BossEnchantments {
         int newRadius = 0;
         try {
             if (radius != null && mode != null && "NORMAL".equals(String.valueOf(mode.get(orb)))) {
-                newRadius = radius.getInt(orb) + (int) Math.ceil(1.5 * lvl);
+                int r = radius.getInt(orb);
+                if (fused) {
+                    r = Math.max(2, Math.round(r * 1.85F));
+                }
+                newRadius = r + (int) Math.ceil(1.5 * lvl);
                 radius.setInt(orb, newRadius);
             }
         } catch (ReflectiveOperationException ignored) {
@@ -217,9 +259,33 @@ public final class BossEnchantments {
         }
         orb.getPersistentData().putInt(CATACLYSM_TAG, lvl);
         orb.getPersistentData().putInt(CATACLYSM_RADIUS_TAG, newRadius);
+        orb.getPersistentData().putBoolean(FUSED_TAG, fused);
     }
 
-    /** When the orb detonates (removed by a hit, not by timing out) red lightning arcs to up to 3 enemies nearby. */
+    /** The Fused gauntlet's laser balls are 1.85x bigger too (radius is read from the beam's owner on the server). */
+    @SubscribeEvent
+    public static void onLaserJoin(EntityJoinLevelEvent event) {
+        Entity beam = event.getEntity();
+        if (!(beam.level() instanceof ServerLevel level) || !LASER_ID.equals(BuiltInRegistries.ENTITY_TYPE.getKey(beam.getType()))) {
+            return;
+        }
+        Field ownerField = field(beam.getClass(), "owner");
+        Field ball = field(beam.getClass(), "ballRadius");
+        try {
+            if (ownerField != null && ball != null && ownerField.get(beam) instanceof java.util.UUID id
+                    && level.getPlayerByUUID(id) instanceof Player player && holdsFused(player)) {
+                ball.setInt(beam, Math.max(2, Math.round(ball.getInt(beam) * 1.85F)));
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // laser keeps its normal size
+        }
+    }
+
+    /**
+     * When the orb detonates (removed by a hit, not by timing out) lightning arcs to up to 3 enemies outside the blast
+     * and deals armor-bypassing true damage: 5 per level in red, and from the Fused gauntlet 2x further out, 2x damage
+     * and rapid blue bolts.
+     */
     @SubscribeEvent
     public static void onOrbLeave(EntityLeaveLevelEvent event) {
         Entity orb = event.getEntity();
@@ -228,19 +294,24 @@ public final class BossEnchantments {
                 || orb.tickCount > 200 || !(orb instanceof net.minecraft.world.entity.projectile.Projectile projectile)) {
             return;
         }
+        boolean fused = orb.getPersistentData().getBoolean(FUSED_TAG);
         Entity owner = projectile.getOwner();
-        Player player = owner instanceof Player p ? p : null;
         double radius = orb.getPersistentData().getInt(CATACLYSM_RADIUS_TAG);
         Vec3 center = orb.position();
-        List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius + 12.0),
+        double reach = fused ? 24.0 : 12.0;
+        List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius + reach),
                         e -> e.isAlive() && e != owner && !(e instanceof Player) && !(e instanceof Npc)
                                 && !(e instanceof TheCorruptedBossEntity) && e.position().distanceTo(center) >= radius)
                 .stream().sorted(Comparator.comparingDouble(e -> e.position().distanceToSqr(center))).limit(3).toList();
         for (LivingEntity target : targets) {
-            arc(level, center.add(0.0, 0.3, 0.0), target.getEyePosition());
-            DamageSource source = player != null ? level.damageSources().playerAttack(player) : level.damageSources().magic();
-            target.invulnerableTime = 0;
-            target.hurt(source, 5.0F * lvl);
+            if (fused) {
+                for (int i = 0; i < 2; i++) {
+                    arc(level, center.add(0.0, 0.3, 0.0), target.getEyePosition(), STYLE_BLUE, 2.0F);
+                }
+            } else {
+                arc(level, center.add(0.0, 0.3, 0.0), target.getEyePosition());
+            }
+            trueDamage(level, target, owner, 5.0F * lvl * (fused ? 2.0F : 1.0F));
         }
     }
 
@@ -248,7 +319,8 @@ public final class BossEnchantments {
 
     @SubscribeEvent
     public static void onCorruptionAdded(MobEffectEvent.Added event) {
-        if (event.getEffectInstance() != null && event.getEffectInstance().getEffect().is(ModEffects.CORRUPTION.getId())
+        if (event.getEffectInstance() != null && (event.getEffectInstance().getEffect().is(ModEffects.CORRUPTION.getId())
+                || event.getEffectInstance().getEffect().is(ModEffects.ABYSSAL_CORRUPTION.getId()))
                 && !event.getEntity().level().isClientSide) {
             if (event.getEffectSource() instanceof Player player) {
                 event.getEntity().getPersistentData().putUUID(CORRUPTION_SOURCE_TAG, player.getUUID());
@@ -275,7 +347,7 @@ public final class BossEnchantments {
                 killer = p;
             }
         }
-        if (killer == null && source.is(DamageTypes.GENERIC_KILL) && victim.hasEffect(ModEffects.CORRUPTION)
+        if (killer == null && source.is(DamageTypes.GENERIC_KILL) && (victim.hasEffect(ModEffects.CORRUPTION) || victim.hasEffect(ModEffects.ABYSSAL_CORRUPTION))
                 && victim.getPersistentData().hasUUID(CORRUPTION_SOURCE_TAG)) {
             killer = victim.level().getPlayerByUUID(victim.getPersistentData().getUUID(CORRUPTION_SOURCE_TAG));
         }
@@ -293,26 +365,42 @@ public final class BossEnchantments {
 
     // ---------------------------------------------------------------- 4. Crimson Retaliation / 5. Plaguebearer (called from ArmorSetBonuses)
 
-    /** The set bonus just blocked a hit: strike the attacker with red lightning, 4 true damage per level, and knock it back. */
-    public static void retaliate(Player player, Entity attacker) {
+    /**
+     * The set bonus just blocked a hit: strike the attacker with lightning, 4 armor-bypassing true damage per level, and
+     * knock it back. A Sovereign parry fires 2x stronger, rapid light-blue lightning (double damage and bolt width).
+     */
+    public static void retaliate(Player player, Entity attacker, boolean sovereign) {
         int lvl = armorLevel(player, CRIMSON_RETALIATION, EquipmentSlot.CHEST);
         if (lvl <= 0 || !(attacker instanceof LivingEntity target) || target == player || !(player.level() instanceof ServerLevel level)) {
             return;
         }
-        arc(level, player.getEyePosition(), target.getEyePosition());
-        if (target instanceof Player other && (other.isCreative() || other.isSpectator())) {
-            return;
+        if (sovereign) {
+            for (int i = 0; i < 3; i++) {
+                arc(level, player.getEyePosition(), target.getEyePosition(), STYLE_BLUE, 2.0F);
+            }
+        } else {
+            arc(level, player.getEyePosition(), target.getEyePosition());
         }
-        target.invulnerableTime = 0;
-        target.hurt(level.damageSources().genericKill(), 4.0F * lvl);
+        trueDamage(level, target, player, 4.0F * lvl * (sovereign ? 2.0F : 1.0F));
         BossCombat.pushAway(player, target, 0.9 + 0.2 * lvl, 0.3);
     }
 
-    /** Corrupted set bonus inflicts Corruption: +2 s per level, and it spreads to 1 extra enemy within 4 blocks per level. */
+    /** Corrupted set bonus inflicts Corruption. */
     public static void applyCorruption(Player player, LivingEntity victim) {
+        inflict(player, victim, ModEffects.CORRUPTION, CorruptionEffect.DURATION_TICKS, STYLE_RED);
+    }
+
+    /** Sovereign set bonus inflicts Abyssal Corruption (3 hearts of true damage a second, blue lightning). */
+    public static void applyAbyssalCorruption(Player player, LivingEntity victim) {
+        inflict(player, victim, ModEffects.ABYSSAL_CORRUPTION, AbyssalCorruptionEffect.DURATION_TICKS, STYLE_BLUE);
+    }
+
+    /** Plaguebearer: +2 s per level, and it spreads to 1 extra enemy within 4 blocks per level. */
+    private static void inflict(Player player, LivingEntity victim, net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect,
+                                int baseDuration, int style) {
         int lvl = armorLevel(player, PLAGUEBEARER, EquipmentSlot.HEAD);
-        int duration = CorruptionEffect.DURATION_TICKS + 40 * lvl;
-        victim.addEffect(new MobEffectInstance(ModEffects.CORRUPTION, duration, 0), player);
+        int duration = baseDuration + 40 * lvl;
+        victim.addEffect(new MobEffectInstance(effect, duration, 0), player);
         if (lvl <= 0) {
             return;
         }
@@ -320,9 +408,9 @@ public final class BossEnchantments {
                         e -> e != victim && isEnemy(player, e)).stream()
                 .sorted(Comparator.comparingDouble(e -> e.distanceToSqr(victim))).limit(lvl).toList();
         for (LivingEntity e : near) {
-            e.addEffect(new MobEffectInstance(ModEffects.CORRUPTION, duration, 0), player);
+            e.addEffect(new MobEffectInstance(effect, duration, 0), player);
             if (victim.level() instanceof ServerLevel level) {
-                arc(level, victim.getEyePosition(), e.getEyePosition());
+                arc(level, victim.getEyePosition(), e.getEyePosition(), style, style == STYLE_BLUE ? 1.6F : 1.0F);
             }
         }
     }

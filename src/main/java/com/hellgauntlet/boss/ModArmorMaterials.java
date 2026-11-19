@@ -45,5 +45,19 @@ public final class ModArmorMaterials {
                     List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(TheCorruptedMod.MODID, "corrupted"))),
                     3.5F, 0.15F));
 
+    /** Fused Sovereign Knight: +6 armor over Corrupted (5/9/11/5 = 30 over 4/7/9/4 = 24), toughness 4, knockback resistance 0.2. */
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> SOVEREIGN = ARMOR_MATERIALS.register("sovereign",
+            () -> new ArmorMaterial(
+                    Util.make(new EnumMap<>(ArmorItem.Type.class), m -> {
+                        m.put(ArmorItem.Type.BOOTS, 5);
+                        m.put(ArmorItem.Type.LEGGINGS, 9);
+                        m.put(ArmorItem.Type.CHESTPLATE, 11);
+                        m.put(ArmorItem.Type.HELMET, 5);
+                        m.put(ArmorItem.Type.BODY, 15);
+                    }),
+                    22, SoundEvents.ARMOR_EQUIP_NETHERITE, () -> Ingredient.of(ModItems.CORRUPTED_CORE.get()),
+                    List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(TheCorruptedMod.MODID, "sovereign"))),
+                    4.0F, 0.2F));
+
     private ModArmorMaterials() {}
 }

@@ -12,5 +12,8 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, CorruptionEffect> CORRUPTION =
             EFFECTS.register("corruption", CorruptionEffect::new);
 
+    public static final DeferredHolder<MobEffect, AbyssalCorruptionEffect> ABYSSAL_CORRUPTION =
+            EFFECTS.register("abyssal_corruption", AbyssalCorruptionEffect::new);
+
     private ModEffects() {}
 }

@@ -33,7 +33,8 @@ public final class ClientSetup {
     public static void onClientExtensions(RegisterClientExtensionsEvent event) {
         event.registerItem(KnightArmorClientExtensions.INSTANCE,
                 ModItems.STEEL_HELMET.get(), ModItems.STEEL_CHESTPLATE.get(), ModItems.STEEL_LEGGINGS.get(), ModItems.STEEL_BOOTS.get(),
-                ModItems.CORRUPTED_HELMET.get(), ModItems.CORRUPTED_CHESTPLATE.get(), ModItems.CORRUPTED_LEGGINGS.get(), ModItems.CORRUPTED_BOOTS.get());
+                ModItems.CORRUPTED_HELMET.get(), ModItems.CORRUPTED_CHESTPLATE.get(), ModItems.CORRUPTED_LEGGINGS.get(), ModItems.CORRUPTED_BOOTS.get(),
+                ModItems.SOVEREIGN_HELMET.get(), ModItems.SOVEREIGN_CHESTPLATE.get(), ModItems.SOVEREIGN_LEGGINGS.get(), ModItems.SOVEREIGN_BOOTS.get());
     }
 
     /** Boss-textured 3D knight armor on players and on every other humanoid-model mob (zombies, skeletons, ...). */
