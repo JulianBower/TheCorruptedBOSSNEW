@@ -8,6 +8,10 @@
     "hellgauntletboss:corrupted_helmet",
     "hellgauntletboss:corrupted_chestplate",
     "hellgauntletboss:corrupted_leggings",
-    "hellgauntletboss:corrupted_boots"
+    "hellgauntletboss:corrupted_boots",
+    "hellgauntletboss:sovereign_helmet",
+    "hellgauntletboss:sovereign_chestplate",
+    "hellgauntletboss:sovereign_leggings",
+    "hellgauntletboss:sovereign_boots"
   ]
 }

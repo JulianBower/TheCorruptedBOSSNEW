@@ -4,6 +4,7 @@
     {
       "id": "hellgauntlet:gauntlet_of_hell",
       "required": false
-    }
+    },
+    "hellgauntletboss:abyssal_storm_gauntlet"
   ]
 }

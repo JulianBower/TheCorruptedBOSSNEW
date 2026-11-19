@@ -27,5 +27,13 @@
   "enchantment.hellgauntletboss.crimson_retaliation": "Crimson Retaliation",
   "enchantment.hellgauntletboss.plaguebearer": "Plaguebearer",
   "enchantment.hellgauntletboss.obsidian_bulwark": "Obsidian Bulwark",
-  "enchantment.hellgauntletboss.hellfire_stride": "Hellfire Stride"
+  "enchantment.hellgauntletboss.hellfire_stride": "Hellfire Stride",
+  "effect.hellgauntletboss.abyssal_corruption": "Abyssal Corruption",
+  "item.hellgauntletboss.sovereign_helmet": "Sovereign Knight Helmet",
+  "item.hellgauntletboss.sovereign_chestplate": "Sovereign Knight Chestplate",
+  "item.hellgauntletboss.sovereign_leggings": "Sovereign Knight Leggings",
+  "item.hellgauntletboss.sovereign_boots": "Sovereign Knight Boots",
+  "item.hellgauntletboss.abyssal_storm_gauntlet": "Abyssal Storm Gauntlet",
+  "item.hellgauntletboss.abyssal_storm_gauntlet.tooltip": "Lightning of the abyss. 8 hearts melee, true-damage chain lightning, 2x blast and reach.",
+  "item.hellgauntletboss.abyssal_storm_gauntlet.needs_mod": "Requires the Hellgauntlet mod"
 }
